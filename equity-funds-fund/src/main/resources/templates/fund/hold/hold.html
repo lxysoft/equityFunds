@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('持有基金信息列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <p>基金代码：</p>
+                                <input type="text" name="fundInfoCode"/>
+                            </li>
+                            <li class="select-time">
+                                <p>日期筛选：</p>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[netWorkDateStart]"/>
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[netWorkDateEnd]"/>
+                            </li>
+
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="fund:hold:add">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="fund:hold:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <!--<a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="fund:hold:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>-->
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="fund:hold:export">
+                    <i class="fa fa-download"></i> 导出
+                 </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('fund:hold:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('fund:hold:remove')}]];
+        var prefix = ctx + "fund/hold";
+        var icon = "&nbsp;<i class='fa fa-exclamation-circle'></i> "
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "持有基金信息",
+                sortName: "net_work_date",
+                sortOrder: "desc",
+                striped: true,
+                escape: true,
+                showPageGo: true,
+                rememberSelected: true,
+                pageList: [10,25,50,100],
+                columns: [
+                {
+                    field : 'id', 
+                    title : '主键',
+                    visible: false
+                },
+                {
+                    field : 'fundInfoCode', 
+                    title : '基金代码'
+                },
+                {
+                    field : 'name',
+                    title : '基金名称'
+                },
+                {
+                    field : 'mony', 
+                    title : '交易金额'
+                },
+                {
+                    field : 'totalAmount',
+                    title : '持有总额'
+                },
+                {
+                    field : 'incomeAmount',
+                    title : '收益金额',
+                    formatter: function(value, row, index) {
+                        return formatValueNum(value);
+                    }
+                },
+                {
+                    field : 'lastNetValueUnit',
+                    title : '上交易日收益',
+                    formatter: function(value, row, index) {
+                        return formatValueNum(value);
+                    }
+
+                },
+                {
+                    field : 'theYield',
+                    title : '总收益率',
+                    formatter: function(value, row, index) {
+                        return formatValue(value);
+                    }
+                },
+                {
+                    field : 'netValueUnit', 
+                    title : '单位净值'
+                },
+                {
+                    field : 'nowNetValueUnit',
+                    title : '近日净值'
+                },
+                {
+                    field : 'netWorkDateStr',
+                    title : '交易日期'
+                },
+                {
+                    field : 'tradeShare',
+                    title : '交易份额'
+                },
+                {
+                    field : 'createTime',
+                    title : '添加时间'
+                },
+                {
+                    field : 'holdDays',
+                    title : '持有时间'+icon,
+                    titleTooltip:"估算持有时间，并不完全准确"
+                },
+                {
+                    field : 'annualYield',
+                    title : '年化收益率'+icon,
+                    titleTooltip:"估算持有时间计算而得，并不完全准确"
+                },
+                {
+                    title: '操作'+icon,
+                    align: 'center',
+                    titleTooltip:"红利再投资生成的交易记录不允许手动修改",
+                    formatter: function(value, row, index) {
+                            var actions = [];
+                        if (!row.fundHoldId){
+                            actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                            //actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        }else{
+                            actions.push('<a class="btn btn-default btn-xs" href="javascript:void(0)" ><i class="fa fa-edit"></i>编辑</a> ');
+                        }
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+
+        function formatValue(value){
+            if(value || value == 0){
+                if (value>=0){
+                    return "<a style='color:red'>"+ Math.round(value*100)/100 +"%</a>";
+                }
+                return "<a style='color:green'>"+ Math.round(value*100)/100 +"%</a>";
+            }
+        }
+        function formatValueNum(value){
+            if(value || value == 0){
+                if (value>=0){
+                    return "<a style='color:red'>"+ Math.round(value*100)/100 +"</a>";
+                }
+                return "<a style='color:green'>"+ Math.round(value*100)/100 +"</a>";
+            }
+        }
+    </script>
+</body>
+</html>

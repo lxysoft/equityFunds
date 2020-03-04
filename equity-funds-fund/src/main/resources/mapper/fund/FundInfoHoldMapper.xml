@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.fund.mapper.FundInfoHoldMapper">
+    
+    <resultMap type="FundInfoHold" id="FundInfoHoldResult">
+        <result property="fundInfoCode"    column="fund_info_code"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="shareBonusType"    column="share_bonus_type"    />
+    </resultMap>
+    <resultMap id="FundInfoHoldResultVo" type="com.ruoyi.fund.vo.FundInfoHoldVo" extends="FundInfoHoldResult">
+        <result property="buyRate"    column="buy_rate"    />
+    </resultMap>
+    <resultMap type="com.ruoyi.fund.domain.FundInfo" id="FundInfoResult">
+        <result property="code"    column="code"    />
+        <result property="name"    column="name"    />
+        <result property="type"    column="type"    />
+        <result property="buyMin"    column="buy_min"    />
+        <result property="buySourceRate"    column="buy_source_rate"    />
+        <result property="buyRate"    column="buy_rate"    />
+        <result property="manager"    column="manager"    />
+        <result property="fundScale"    column="fund_scale"    />
+        <result property="worthDate"    column="worth_date"    />
+        <result property="expectWorthDate"    column="expect_worth_date"    />
+        <result property="millionCopiesIncome"    column="million_copies_income"    />
+        <result property="millionCopiesIncomeDate"    column="million_copies_income_date"    />
+        <result property="sevenDaysYearIncome"    column="seven_days_year_income"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+    <resultMap type="com.ruoyi.fund.vo.FundInfoVo" id="FundInfoResultVo" extends="FundInfoResult">
+        <result property="shareBonusType"    column="share_bonus_type"    />
+        <association property="fundNetWorth" javaType="com.ruoyi.fund.domain.FundNetWorth">
+            <!-- id:声明主键，表示user_id是关联查询对象的唯一标识-->
+            <result property="id"    column="id"    />
+            <result property="fundInfoCode"    column="fund_info_code"    />
+            <result property="netWorth"    column="net_worth"    />
+            <result property="expectWorth"    column="expect_worth"    />
+            <result property="totalWorth"    column="total_worth"    />
+            <result property="expectGrowth"    column="expect_growth"    />
+            <result property="dayGrowth"    column="day_growth"    />
+            <result property="lastWeekGrowth"    column="last_week_growth"    />
+            <result property="lastMonthGrowth"    column="last_month_growth"    />
+            <result property="lastThreeMonthGrowth"    column="last_three_month_growth"    />
+            <result property="lastSixMonthGrowth"    column="last_six_month_growth"    />
+            <result property="lastYearGrowth"    column="last_year_growth"    />
+        </association>
+    </resultMap>
+
+    <sql id="selectFundInfoHoldVo">
+        select fund_info_code, del_flag, create_by, create_time, update_by, update_time, share_bonus_type from fund_info_hold
+    </sql>
+    <sql id="selectFundInfoVoJoin">
+        select h.create_by,w.*,i.*,h.share_bonus_type from fund_info_hold h join  fund_info i on h.fund_info_code = i.code join fund_net_worth w on h.fund_info_code = w.fund_info_code
+    </sql>
+
+    <select id="selectFundInfoHoldList" parameterType="FundInfoHold" resultMap="FundInfoHoldResult">
+        <include refid="selectFundInfoHoldVo"/>
+        <where>
+            <if test="createBy != null "> and create_by = #{createBy}</if>
+        </where>
+    </select>
+    <select id="selectFundInfoHoldListAll" parameterType="com.ruoyi.fund.domain.FundInfo" resultMap="FundInfoResultVo">
+        <include refid="selectFundInfoVoJoin"/>
+        <where>
+            <if test="createBy != null "> and h.create_by = #{createBy}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+        </where>
+    </select>
+    
+    <select id="selectFundInfoHoldById" parameterType="String" resultMap="FundInfoHoldResult">
+        <include refid="selectFundInfoHoldVo"/>
+        where fund_info_code = #{fundInfoCode}
+    </select>
+    <select id="selectFundInfoHoldListJoinInfo" resultMap="FundInfoHoldResultVo">
+         select ih.*,i.buy_rate
+        from fund_info_hold ih join fund_info i on ih.fund_info_code = i.code
+    </select>
+
+    <insert id="insertFundInfoHold" parameterType="FundInfoHold">
+        insert into fund_info_hold
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fundInfoCode != null  and fundInfoCode != ''">fund_info_code,</if>
+            <if test="delFlag != null  and delFlag != ''">del_flag,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="updateBy != null ">update_by,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="shareBonusType != null  and shareBonusType != ''">share_bonus_type,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="fundInfoCode != null  and fundInfoCode != ''">#{fundInfoCode},</if>
+            <if test="delFlag != null  and delFlag != ''">#{delFlag},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="updateBy != null ">#{updateBy},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="shareBonusType != null  and shareBonusType != ''">#{shareBonusType},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFundInfoHold" parameterType="FundInfoHold">
+        update fund_info_hold
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="delFlag != null  and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="createBy != null  and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="updateBy != null ">update_by = #{updateBy},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="shareBonusType != null  and shareBonusType != ''">share_bonus_type = #{shareBonusType},</if>
+        </trim>
+        where fund_info_code = #{fundInfoCode}
+    </update>
+
+    <delete id="deleteFundInfoHoldById" parameterType="String">
+        delete from fund_info_hold where fund_info_code = #{fundInfoCode}
+    </delete>
+
+    <delete id="deleteFundInfoHoldByIds" parameterType="String">
+        delete from fund_info_hold where fund_info_code in 
+        <foreach item="fundInfoCode" collection="array" open="(" separator="," close=")">
+            #{fundInfoCode}
+        </foreach>
+    </delete>
+    
+</mapper>

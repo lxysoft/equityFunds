@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.fund.mapper.FundNetWorthMapper">
+    
+    <resultMap type="FundNetWorth" id="FundNetWorthResult">
+        <result property="id"    column="id"    />
+        <result property="fundInfoCode"    column="fund_info_code"    />
+        <result property="netWorth"    column="net_worth"    />
+        <result property="expectWorth"    column="expect_worth"    />
+        <result property="totalWorth"    column="total_worth"    />
+        <result property="expectGrowth"    column="expect_growth"    />
+        <result property="dayGrowth"    column="day_growth"    />
+        <result property="lastWeekGrowth"    column="last_week_growth"    />
+        <result property="lastMonthGrowth"    column="last_month_growth"    />
+        <result property="lastThreeMonthGrowth"    column="last_three_month_growth"    />
+        <result property="lastSixMonthGrowth"    column="last_six_month_growth"    />
+        <result property="lastYearGrowth"    column="last_year_growth"    />
+    </resultMap>
+
+    <sql id="selectFundNetWorthVo">
+        select id, fund_info_code, net_worth, expect_worth, total_worth, expect_growth, day_growth, last_week_growth, last_month_growth, last_three_month_growth, last_six_month_growth, last_year_growth from fund_net_worth
+    </sql>
+
+    <select id="selectFundNetWorthList" parameterType="FundNetWorth" resultMap="FundNetWorthResult">
+        <include refid="selectFundNetWorthVo"/>
+        <where>  
+            <if test="lastYearGrowth != null  and lastYearGrowth != ''"> and last_year_growth = #{lastYearGrowth}</if>
+        </where>
+    </select>
+    
+    <select id="selectFundNetWorthById" parameterType="String" resultMap="FundNetWorthResult">
+        <include refid="selectFundNetWorthVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertFundNetWorth" parameterType="FundNetWorth">
+        insert into fund_net_worth
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">id,</if>
+            <if test="fundInfoCode != null  and fundInfoCode != ''">fund_info_code,</if>
+            <if test="netWorth != null ">net_worth,</if>
+            <if test="expectWorth != null ">expect_worth,</if>
+            <if test="totalWorth != null ">total_worth,</if>
+            <if test="expectGrowth != null  and expectGrowth != ''">expect_growth,</if>
+            <if test="dayGrowth != null  and dayGrowth != ''">day_growth,</if>
+            <if test="lastWeekGrowth != null  and lastWeekGrowth != ''">last_week_growth,</if>
+            <if test="lastMonthGrowth != null  and lastMonthGrowth != ''">last_month_growth,</if>
+            <if test="lastThreeMonthGrowth != null  and lastThreeMonthGrowth != ''">last_three_month_growth,</if>
+            <if test="lastSixMonthGrowth != null  and lastSixMonthGrowth != ''">last_six_month_growth,</if>
+            <if test="lastYearGrowth != null  and lastYearGrowth != ''">last_year_growth,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">#{id},</if>
+            <if test="fundInfoCode != null  and fundInfoCode != ''">#{fundInfoCode},</if>
+            <if test="netWorth != null ">#{netWorth},</if>
+            <if test="expectWorth != null ">#{expectWorth},</if>
+            <if test="totalWorth != null ">#{totalWorth},</if>
+            <if test="expectGrowth != null  and expectGrowth != ''">#{expectGrowth},</if>
+            <if test="dayGrowth != null  and dayGrowth != ''">#{dayGrowth},</if>
+            <if test="lastWeekGrowth != null  and lastWeekGrowth != ''">#{lastWeekGrowth},</if>
+            <if test="lastMonthGrowth != null  and lastMonthGrowth != ''">#{lastMonthGrowth},</if>
+            <if test="lastThreeMonthGrowth != null  and lastThreeMonthGrowth != ''">#{lastThreeMonthGrowth},</if>
+            <if test="lastSixMonthGrowth != null  and lastSixMonthGrowth != ''">#{lastSixMonthGrowth},</if>
+            <if test="lastYearGrowth != null  and lastYearGrowth != ''">#{lastYearGrowth},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFundNetWorth" parameterType="FundNetWorth">
+        update fund_net_worth
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fundInfoCode != null  and fundInfoCode != ''">fund_info_code = #{fundInfoCode},</if>
+            <if test="netWorth != null ">net_worth = #{netWorth},</if>
+            <if test="expectWorth != null ">expect_worth = #{expectWorth},</if>
+            <if test="totalWorth != null ">total_worth = #{totalWorth},</if>
+            <if test="expectGrowth != null  and expectGrowth != ''">expect_growth = #{expectGrowth},</if>
+            <if test="dayGrowth != null  and dayGrowth != ''">day_growth = #{dayGrowth},</if>
+            <if test="lastWeekGrowth != null  and lastWeekGrowth != ''">last_week_growth = #{lastWeekGrowth},</if>
+            <if test="lastMonthGrowth != null  and lastMonthGrowth != ''">last_month_growth = #{lastMonthGrowth},</if>
+            <if test="lastThreeMonthGrowth != null  and lastThreeMonthGrowth != ''">last_three_month_growth = #{lastThreeMonthGrowth},</if>
+            <if test="lastSixMonthGrowth != null  and lastSixMonthGrowth != ''">last_six_month_growth = #{lastSixMonthGrowth},</if>
+            <if test="lastYearGrowth != null  and lastYearGrowth != ''">last_year_growth = #{lastYearGrowth},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFundNetWorthById" parameterType="String">
+        delete from fund_net_worth where id = #{id}
+    </delete>
+
+    <delete id="deleteFundNetWorthByIds" parameterType="String">
+        delete from fund_net_worth where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增基金历史收益')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-income-add">
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">日期yyMMdd 6为int：</label>
+                <div class="col-sm-8">
+                    <input name="netWorkDate" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">基金代码：</label>
+                <div class="col-sm-8">
+                    <input name="fundInfoCode" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">持有金额：</label>
+                <div class="col-sm-8">
+                    <input name="holdMony" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">持有份额：</label>
+                <div class="col-sm-8">
+                    <input name="holdTradeShare" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">当前收益金额：</label>
+                <div class="col-sm-8">
+                    <input name="incomeMony" class="form-control" type="text">
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script type="text/javascript">
+        var prefix = ctx + "fund/income"
+        $("#form-income-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-income-add').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

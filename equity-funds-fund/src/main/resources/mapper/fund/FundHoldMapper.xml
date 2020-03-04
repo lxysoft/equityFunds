@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.fund.mapper.FundHoldMapper">
+    
+    <resultMap type="com.ruoyi.fund.domain.FundHold" id="FundHoldResult">
+        <result property="id"    column="id"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="fundInfoCode"    column="fund_info_code"    />
+        <result property="mony"    column="mony"    />
+        <result property="netValueUnit"    column="net_value_unit"    />
+        <result property="netWorkDate"    column="net_work_date"    />
+        <result property="tradeShare"    column="trade_share"    />
+        <result property="fundHoldId"    column="fund_hold_id"    />
+        <result property="shareBonusType"    column="share_bonus_type"    />
+    </resultMap>
+    <resultMap type="com.ruoyi.fund.vo.FundHoldVo" id="FundHoldResultVo" extends="FundHoldResult">
+    </resultMap>
+
+    <sql id="selectFundHoldVo">
+        select id, del_flag, create_by, create_time, update_by, update_time, fund_info_code, mony, net_value_unit, net_work_date, trade_share, fund_hold_id, share_bonus_type from fund_hold
+    </sql>
+
+    <select id="selectFundHoldList" parameterType="com.ruoyi.fund.domain.FundHold" resultMap="FundHoldResultVo">
+        select d.* , i.name from fund_hold d join fund_info i on i.code = d.fund_info_code
+        <where>  
+            <if test="fundInfoCode != null  and fundInfoCode != ''"> and d.fund_info_code = #{fundInfoCode}</if>
+            <if test="createBy != null "> and d.create_by = #{createBy}</if>
+            <if test="netWorkDate != null "> and d.net_work_date &lt; #{netWorkDate}</if>
+            <if test="params.netWorkDateStart != null and params.netWorkDateEnd != null"> and d.net_work_date between #{params.netWorkDateStart} and #{params.netWorkDateEnd} </if>
+        </where>
+    </select>
+    
+    <select id="selectFundHoldById" parameterType="String" resultMap="FundHoldResult">
+        <include refid="selectFundHoldVo"/>
+        where id = #{id}
+    </select>
+    <select id="sumMonyByCode" resultType="java.lang.Double">
+        select IFNULL(sum(mony),0) total from fund_hold where fund_info_code = #{fundInfoCode}
+        <if test="id != null  and id != ''">
+            and id != #{id}
+        </if>
+    </select>
+    <select id="getEarliesDataByCode" resultMap="FundHoldResult">
+        <include refid="selectFundHoldVo"/>
+        where fund_info_code = #{fundInfoCode}
+                order by net_work_date asc
+                limit 1
+    </select>
+    <select id="statisticalByDateInt" resultMap="FundHoldResult">
+        SELECT
+            sum( trade_share ) trade_share,
+            sum( mony ) mony
+        FROM
+            fund_hold
+        WHERE
+            fund_info_code = #{fundInfoCode}
+            AND create_by = #{createBy}
+        <if test="netWortDate != null">
+            AND net_work_date &lt; #{netWortDate}
+        </if>
+    </select>
+
+    <insert id="insertFundHold" parameterType="com.ruoyi.fund.domain.FundHold">
+        insert into fund_hold
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">id,</if>
+            <if test="delFlag != null  and delFlag != ''">del_flag,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="updateBy != null  and updateBy != ''">update_by,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="fundInfoCode != null  and fundInfoCode != ''">fund_info_code,</if>
+            <if test="mony != null ">mony,</if>
+            <if test="netValueUnit != null ">net_value_unit,</if>
+            <if test="netWorkDate != null ">net_work_date,</if>
+            <if test="tradeShare != null ">trade_share,</if>
+            <if test="fundHoldId != null ">fund_hold_id,</if>
+            <if test="shareBonusType != null ">share_bonus_type,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">#{id},</if>
+            <if test="delFlag != null  and delFlag != ''">#{delFlag},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="updateBy != null  and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="fundInfoCode != null  and fundInfoCode != ''">#{fundInfoCode},</if>
+            <if test="mony != null ">#{mony},</if>
+            <if test="netValueUnit != null ">#{netValueUnit},</if>
+            <if test="netWorkDate != null ">#{netWorkDate},</if>
+            <if test="tradeShare != null ">#{tradeShare},</if>
+            <if test="fundHoldId != null ">#{fundHoldId},</if>
+            <if test="shareBonusType != null ">#{shareBonusType},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFundHold" parameterType="com.ruoyi.fund.domain.FundHold">
+        update fund_hold
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="delFlag != null  and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="createBy != null  and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="updateBy != null  and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="fundInfoCode != null  and fundInfoCode != ''">fund_info_code = #{fundInfoCode},</if>
+            <if test="mony != null ">mony = #{mony},</if>
+            <if test="netValueUnit != null ">net_value_unit = #{netValueUnit},</if>
+            <if test="netWorkDate != null ">net_work_date = #{netWorkDate},</if>
+            <if test="tradeShare != null ">trade_share = #{tradeShare},</if>
+            <if test="fundHoldId != null ">fund_hold_id = #{fundHoldId},</if>
+            <if test="shareBonusType != null ">share_bonus_type = #{shareBonusType},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFundHoldById" parameterType="String">
+        delete from fund_hold where id = #{id}
+    </delete>
+
+    <delete id="deleteFundHoldByIds" parameterType="String">
+        delete from fund_hold where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="deleteByFunfHoldId" parameterType="String">
+        delete from fund_hold where create_by = #{createBy}
+        and fund_info_code = #{fundInfoCode}
+        and fund_hold_id = '1'
+    </delete>
+
+</mapper>

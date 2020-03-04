@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('基金基础数据列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <p>基金代码：</p>
+                                <input type="text" name="code"/>
+                            </li>
+                            <li>
+                                <p>基金名称：</p>
+                                <input type="text" name="name"/>
+                            </li>
+                            <li>
+                                <p>基金类型：</p>
+                                <select name="type" th:with="type=${@dict.getType('funds_type')}">
+                                    <option value="">所有</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <!--<a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="fund:info:add">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="fund:info:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="fund:info:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>-->
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="fund:info:export">
+                    <i class="fa fa-download"></i> 导出
+                 </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('fund:info:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('fund:info:remove')}]];
+        var prefix = ctx + "fund/info";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "基金基础数据",
+                striped: true,
+                escape: true,
+                showPageGo: true,
+                rememberSelected: true,
+                pageList: [10,25,50,100],
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field : 'code', 
+                    title : '基金代码'
+                },
+                {
+                    field : 'name', 
+                    title : '基金名称'
+                },
+                {
+                    field : 'type', 
+                    title : '基金类型'
+                },
+                {
+                    field : 'buyMin', 
+                    title : '起购额度',
+                    formatter: function(value, row, index) {
+                        return value+"元";
+                    }
+                },
+                {
+                    field : 'fundNetWorth.netWorth',
+                    title : '单位净值'
+                },
+                {
+                    field : 'fundNetWorth.expectWorth',
+                    title : '估算净值'
+                },
+                {
+                    field : 'fundNetWorth.totalWorth',
+                    title : '累计净值'
+                },
+                {
+                    field : 'fundNetWorth.expectGrowth',
+                    title : '估算日涨幅',
+                    formatter: function(value, row, index) {
+                        return formatValue(value);
+                    }
+                },
+                {
+                    field : 'fundNetWorth.dayGrowth',
+                    title : '日涨幅',
+                    formatter: function(value, row, index) {
+                        return formatValue(value);
+                    }
+                },
+                /*{
+                    field : 'fundNetWorth.lastWeekGrowth',
+                    title : '周涨幅',
+                    formatter: function(value, row, index) {
+                        if(value){
+                            return value+"%";
+                        }
+                    }
+                },*/
+                {
+                    field : 'fundNetWorth.lastMonthGrowth',
+                    title : '月涨幅',
+                    formatter: function(value, row, index) {
+                        return formatValue(value);
+                    }
+                },
+                {
+                    field : 'fundNetWorth.lastThreeMonthGrowth',
+                    title : '三月涨幅',
+                    formatter: function(value, row, index) {
+                        return formatValue(value);
+                    }
+                },
+                {
+                    field : 'fundNetWorth.lastSixMonthGrowth',
+                    title : '六月涨幅',
+                    formatter: function(value, row, index) {
+                        return formatValue(value);
+                    }
+                },
+                {
+                    field : 'fundNetWorth.lastYearGrowth',
+                    title : '年涨幅',
+                    formatter: function(value, row, index) {
+                        return formatValue(value);
+                    }
+                },
+                {
+                    field : 'buySourceRate', 
+                    title : '原始买入费率',
+                    formatter: function(value, row, index) {
+                        if(value){
+                            return Math.round(value*100)/100+"%";
+                        }
+                    }
+                },
+                {
+                    field : 'buyRate', 
+                    title : '当前买入费率',
+                    formatter: function(value, row, index) {
+                        if(value){
+                            return Math.round(value*100)/100+"%";
+                        }
+                    }
+                },
+                {
+                    field : 'manager', 
+                    title : '基金经理'
+                },
+                {
+                    field : 'fundScale', 
+                    title : '基金规模'
+                },
+                {
+                    field : 'worthDate', 
+                    title : '净值更新日期',
+                    formatter: function(value, row, index) {
+                        return new Date(value).format("yyyy-MM-dd");
+                    }
+                },
+                {
+                    field : 'expectWorthDate', 
+                    title : '净值估算更新日期',
+                    formatter: function(value, row, index) {
+                        return new Date(value).format("yyyy-MM-dd");
+                    }
+                },
+                {
+                    field : 'millionCopiesIncome', 
+                    title : '每万分收益',
+                    titleTooltip : "货币基金使用"
+                },
+                {
+                    field : 'millionCopiesIncomeDate', 
+                    title : '七日年化收益更新日期',
+                    titleTooltip : "货币基金使用",
+                    formatter: function(value, row, index) {
+                        if (row.millionCopiesIncome){
+                            return new Date(value).format("yyyy-MM-dd");
+                        }
+                        return  "-";
+                    }
+                },
+                {
+                    field : 'sevenDaysYearIncome', 
+                    title : '七日年化收益',
+                    titleTooltip : "货币基金使用"
+                }/*,
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.code + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.code + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }*/]
+            };
+            $.table.init(options);
+        });
+
+        function formatValue(value){
+            if(value){
+                if (value>0){
+                    return "<a style='color:red'>"+ Math.round(value*100)/100 +"%</a>";
+                }
+                return "<a style='color:green'>"+ Math.round(value*100)/100 +"%</a>";
+            }
+        }
+
+        Date.prototype.format = function(fmt) {
+            var o = {
+                "M+" : this.getMonth()+1,                 //月份
+                "d+" : this.getDate(),                    //日
+                "h+" : this.getHours(),                   //小时
+                "m+" : this.getMinutes(),                 //分
+                "s+" : this.getSeconds(),                 //秒
+                "q+" : Math.floor((this.getMonth()+3)/3), //季度
+                "S"  : this.getMilliseconds()             //毫秒
+            };
+            if(/(y+)/.test(fmt)) {
+                fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
+            }
+            for(var k in o) {
+                if(new RegExp("("+ k +")").test(fmt)){
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+                }
+            }
+            return fmt;
+        }
+    </script>
+</body>
+</html>

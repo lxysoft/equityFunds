@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.fund.mapper.FundDaysNetWorthMapper">
+    
+    <resultMap type="FundDaysNetWorth" id="FundDaysNetWorthResult">
+        <result property="id"    column="id"    />
+        <result property="fundInfoCode"    column="fund_info_code"    />
+        <result property="netWortDate"    column="net_wort_date"    />
+        <result property="netValueUnit"    column="net_value_unit"    />
+        <result property="netGains"    column="net_gains"    />
+        <result property="eachShareBonus"    column="each_share_bonus"    />
+        <result property="sevenDaysYearIncome"    column="seven_days_year_income"    />
+        <result property="millionCopiesIncome"    column="million_copies_income"    />
+    </resultMap>
+
+    <sql id="selectFundDaysNetWorthVo">
+        select id, fund_info_code, net_wort_date, net_value_unit, net_gains, each_share_bonus, seven_days_year_income, million_copies_income from fund_days_net_worth
+    </sql>
+
+    <select id="selectFundDaysNetWorthList" parameterType="FundDaysNetWorth" resultMap="FundDaysNetWorthResult">
+        <include refid="selectFundDaysNetWorthVo"/>
+        <where>
+            <if test="fundInfoCode != null  and fundInfoCode != ''"> and fund_info_code = #{fundInfoCode}</if>
+            <if test="netWortDate != null "> and net_wort_date &gt;= #{netWortDate}</if>
+        </where>
+    </select>
+
+    <select id="selectFundDaysNetWorthListAsc" parameterType="FundDaysNetWorth" resultMap="FundDaysNetWorthResult">
+        <include refid="selectFundDaysNetWorthVo"/>
+        <where>
+            <if test="fundInfoCode != null  and fundInfoCode != ''"> and fund_info_code = #{fundInfoCode}</if>
+            <if test="netWortDate != null "> and net_wort_date &gt;= #{netWortDate}</if>
+        </where>
+        order by net_wort_date asc
+    </select>
+
+    <select id="selectFundDaysNetWorthById" parameterType="String" resultMap="FundDaysNetWorthResult">
+        <include refid="selectFundDaysNetWorthVo"/>
+        where id = #{id}
+    </select>
+    <select id="selectLastDateInfo" resultMap="FundDaysNetWorthResult">
+        <include refid="selectFundDaysNetWorthVo"/>
+        where fund_info_code = #{code}
+        order by net_wort_date desc
+        limit ${limit}
+    </select>
+    <select id="findByDateAndCode" resultMap="FundDaysNetWorthResult">
+        <include refid="selectFundDaysNetWorthVo"/>
+        where fund_info_code = #{fundInfoCode} and net_wort_date = #{netWorkDate}
+        limit 1
+    </select>
+    <select id="findHaveShareBonusData" resultMap="FundDaysNetWorthResult">
+        <include refid="selectFundDaysNetWorthVo"/>
+        <where>
+            <if test="startDateInt != null  and endDateInt != ''"> net_wort_date between #{startDateInt} and #{endDateInt}</if>
+            and each_share_bonus != ''
+            and fund_info_code = #{fundInfoCode}
+        </where>
+    </select>
+
+    <insert id="insertFundDaysNetWorth" parameterType="FundDaysNetWorth">
+        insert into fund_days_net_worth
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">id,</if>
+            <if test="fundInfoCode != null  and fundInfoCode != ''">fund_info_code,</if>
+            <if test="netWortDate != null ">net_wort_date,</if>
+            <if test="netValueUnit != null ">net_value_unit,</if>
+            <if test="netGains != null ">net_gains,</if>
+            <if test="eachShareBonus != null ">each_share_bonus,</if>
+            <if test="sevenDaysYearIncome != null ">seven_days_year_income,</if>
+            <if test="millionCopiesIncome != null ">million_copies_income,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">#{id},</if>
+            <if test="fundInfoCode != null  and fundInfoCode != ''">#{fundInfoCode},</if>
+            <if test="netWortDate != null ">#{netWortDate},</if>
+            <if test="netValueUnit != null ">#{netValueUnit},</if>
+            <if test="netGains != null ">#{netGains},</if>
+            <if test="eachShareBonus != null ">#{eachShareBonus},</if>
+            <if test="sevenDaysYearIncome != null ">#{sevenDaysYearIncome},</if>
+            <if test="millionCopiesIncome != null ">#{millionCopiesIncome},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFundDaysNetWorth" parameterType="FundDaysNetWorth">
+        update fund_days_net_worth
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fundInfoCode != null  and fundInfoCode != ''">fund_info_code = #{fundInfoCode},</if>
+            <if test="netWortDate != null ">net_wort_date = #{netWortDate},</if>
+            <if test="netValueUnit != null ">net_value_unit = #{netValueUnit},</if>
+            <if test="netGains != null ">net_gains = #{netGains},</if>
+            <if test="eachShareBonus != null ">each_share_bonus = #{eachShareBonus},</if>
+            <if test="sevenDaysYearIncome != null ">seven_days_year_income = #{sevenDaysYearIncome},</if>
+            <if test="millionCopiesIncome != null ">million_copies_income = #{millionCopiesIncome},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFundDaysNetWorthById" parameterType="String">
+        delete from fund_days_net_worth where id = #{id}
+    </delete>
+
+    <delete id="deleteFundDaysNetWorthByIds" parameterType="String">
+        delete from fund_days_net_worth where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

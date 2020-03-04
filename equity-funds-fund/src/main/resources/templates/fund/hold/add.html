@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增持有基金信息')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-hold-add">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">基金编号：</label>
+                <div class="col-sm-8">
+                    <div class="input-group" >
+                        <input type="text" class="form-control" name="fundInfoCode" id="fundInfoCode">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-white dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                            </ul>
+                        </div>
+                        <!-- /btn-group -->
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">交易方式：</label>
+                <div class="col-sm-8" style="height: 49px;">
+                    <div class="checkbox check-box col-sm-5">
+                        <label>
+                            <input type="radio" value="1" checked="" name="buyType"> <i></i> 买入</label>
+                    </div>
+                    <div class="checkbox check-box col-sm-5">
+                        <label>
+                            <input type="radio" value="-1"  name="buyType"> <i></i> 卖出</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">交易金额：</label>
+                <div class="col-sm-8">
+                    <div class="input-group m-b ">
+                        <span class="input-group-addon">&yen;</span>
+                        <input type="text" name="mony" class="form-control"> <span class="input-group-addon">.00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">交易日期：</label>
+                <div class="col-sm-8">
+                    <div class="input-group date">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" name="netWorkDateStr" class="form-control" id="netWorkDateStr" placeholder="yyyy-MM-dd">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">红利操作：</label>
+                <div class="col-sm-8" style="height: 49px;">
+                    <div class="checkbox check-box col-sm-4">
+                        <label>
+                            <input type="radio" value="2" checked name="shareBonusType"> <i></i> 红利再投资</label>
+                    </div>
+                    <div class="checkbox check-box col-sm-4">
+                        <label>
+                            <input type="radio" value="1"   name="shareBonusType"> <i></i> 红利变现</label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-suggest-js" />
+    <script type="text/javascript">
+        var prefix = ctx + "fund/hold"
+        var icon = "<i class='fa fa-times-circle'></i> ";
+        $("#form-hold-add").validate({
+            focusCleanup: true,//required: true,
+            rules: {
+                fundInfoCode: {
+                    required: true,
+                    checkinfo:true
+                },
+                mony: {
+                    required: true,
+                    number:true
+                },
+                netWorkDateStr: {
+                    required: true
+                }
+            },
+            messages: {
+                fundInfoCode: {
+                    required: icon+"请输入基金代码"
+                },
+                mony: {
+                    required: icon+"请输入交易金额",
+                    number:icon+"请输入正确的数字金额"
+                },
+                netWorkDateStr: {
+                    required: icon+"请选择交易日期"
+                }
+            }
+        });
+
+        $.validator.addMethod("checkinfo",function(value,element,params){
+            var checkinfo = /^[0-9]{6}[-].+$/;
+            return this.optional(element)||(checkinfo.test(value));
+        },icon+"请输入编号选择对应基金");
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-hold-add').serialize());
+            }
+        }
+
+
+        //搜索
+        var baiduBsSuggest = $("#fundInfoCode").bsSuggest({
+            allowNoKeyword: false, //是否允许无关键字时请求数据
+            getDataMethod: "url", //获取数据的方式，总是从 URL 获取
+            url: ctx + 'fund/base/findByCode?fundCode=',
+            /*优先从url ajax 请求 json 帮助数据，注意最后一个参数为关键字请求参数*/
+            processData: function (json) { // url 获取数据时，对数据的处理，作为 getData 的回调函数
+                json = json.value;
+                var i, len, data = {
+                    value: []
+                };
+                if (!json || json.length === 0) {
+                    return false;
+                }
+
+                len = json.length;
+                for (i = 0; i < len; i++) {
+                    data.value.push({
+                        word: json[i]
+                    });
+                }
+                data.defaults = '请输入基金编号';
+                //字符串转化为 js 对象
+                return data;
+            }
+        });
+
+        layui.use('laydate', function() {
+            var laydate = layui.laydate;
+            laydate.render({
+                elem: '#netWorkDateStr'
+            });
+        });
+    </script>
+</body>
+</html>

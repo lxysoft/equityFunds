@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.fund.mapper.FundInfoMapper">
+    
+    <resultMap type="FundInfo" id="FundInfoResult">
+        <result property="code"    column="code"    />
+        <result property="name"    column="name"    />
+        <result property="type"    column="type"    />
+        <result property="buyMin"    column="buy_min"    />
+        <result property="buySourceRate"    column="buy_source_rate"    />
+        <result property="buyRate"    column="buy_rate"    />
+        <result property="manager"    column="manager"    />
+        <result property="fundScale"    column="fund_scale"    />
+        <result property="worthDate"    column="worth_date"    />
+        <result property="expectWorthDate"    column="expect_worth_date"    />
+        <result property="millionCopiesIncome"    column="million_copies_income"    />
+        <result property="millionCopiesIncomeDate"    column="million_copies_income_date"    />
+        <result property="sevenDaysYearIncome"    column="seven_days_year_income"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <resultMap type="com.ruoyi.fund.vo.FundInfoVo" id="FundInfoResultVo" extends="FundInfoResult">
+        <association property="fundNetWorth" javaType="com.ruoyi.fund.domain.FundNetWorth">
+            <!-- id:声明主键，表示user_id是关联查询对象的唯一标识-->
+            <result property="id"    column="id"    />
+            <result property="fundInfoCode"    column="fund_info_code"    />
+            <result property="netWorth"    column="net_worth"    />
+            <result property="expectWorth"    column="expect_worth"    />
+            <result property="totalWorth"    column="total_worth"    />
+            <result property="expectGrowth"    column="expect_growth"    />
+            <result property="dayGrowth"    column="day_growth"    />
+            <result property="lastWeekGrowth"    column="last_week_growth"    />
+            <result property="lastMonthGrowth"    column="last_month_growth"    />
+            <result property="lastThreeMonthGrowth"    column="last_three_month_growth"    />
+            <result property="lastSixMonthGrowth"    column="last_six_month_growth"    />
+            <result property="lastYearGrowth"    column="last_year_growth"    />
+        </association>
+    </resultMap>
+    <sql id="selectFundInfoVo">
+        select code, name, type, buy_min, buy_source_rate, buy_rate, manager, fund_scale, worth_date, expect_worth_date, million_copies_income, million_copies_income_date, seven_days_year_income, del_flag, create_by, create_time, update_by, update_time from fund_info
+    </sql>
+    <sql id="selectFundInfoVoJoin">
+        select * from fund_info i join fund_net_worth w on i.code = w.fund_info_code
+    </sql>
+    <select id="selectFundInfoList" parameterType="FundInfo" resultMap="FundInfoResultVo">
+        <include refid="selectFundInfoVoJoin"/>
+        <where>  
+            <if test="code != null  and code != ''"> and code = #{code}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="params.beginBuyMin != null and params.beginBuyMin != '' and params.endBuyMin != null and params.endBuyMin != ''"> and buy_min between #{params.beginBuyMin} and #{params.endBuyMin}</if>
+            <if test="params.beginBuyRate != null and params.beginBuyRate != '' and params.endBuyRate != null and params.endBuyRate != ''"> and buy_rate between #{params.beginBuyRate} and #{params.endBuyRate}</if>
+            <if test="manager != null  and manager != ''"> and manager = #{manager}</if>
+            <if test="fundScale != null  and fundScale != ''"> and fund_scale &gt;= #{fundScale}</if>
+            <if test="millionCopiesIncome != null "> and million_copies_income &gt;= #{millionCopiesIncome}</if>
+            <if test="millionCopiesIncomeDate != null "> and million_copies_income_date &gt;= #{millionCopiesIncomeDate}</if>
+            <if test="sevenDaysYearIncome != null "> and seven_days_year_income &gt;= #{sevenDaysYearIncome}</if>
+        </where>
+        order by create_time desc
+    </select>
+    
+    <select id="selectFundInfoById" parameterType="String" resultMap="FundInfoResult">
+        <include refid="selectFundInfoVo"/>
+        where code = #{code}
+    </select>
+        
+    <insert id="insertFundInfo" parameterType="FundInfo">
+        insert into fund_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null  and code != ''">code,</if>
+            <if test="name != null  and name != ''">name,</if>
+            <if test="type != null  and type != ''">type,</if>
+            <if test="buyMin != null ">buy_min,</if>
+            <if test="buySourceRate != null ">buy_source_rate,</if>
+            <if test="buyRate != null ">buy_rate,</if>
+            <if test="manager != null  and manager != ''">manager,</if>
+            <if test="fundScale != null  and fundScale != ''">fund_scale,</if>
+            <if test="worthDate != null ">worth_date,</if>
+            <if test="expectWorthDate != null ">expect_worth_date,</if>
+            <if test="millionCopiesIncome != null ">million_copies_income,</if>
+            <if test="millionCopiesIncomeDate != null ">million_copies_income_date,</if>
+            <if test="sevenDaysYearIncome != null ">seven_days_year_income,</if>
+            <if test="delFlag != null  and delFlag != ''">del_flag,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="updateBy != null  and updateBy != ''">update_by,</if>
+            <if test="updateTime != null ">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null  and code != ''">#{code},</if>
+            <if test="name != null  and name != ''">#{name},</if>
+            <if test="type != null  and type != ''">#{type},</if>
+            <if test="buyMin != null ">#{buyMin},</if>
+            <if test="buySourceRate != null ">#{buySourceRate},</if>
+            <if test="buyRate != null ">#{buyRate},</if>
+            <if test="manager != null  and manager != ''">#{manager},</if>
+            <if test="fundScale != null  and fundScale != ''">#{fundScale},</if>
+            <if test="worthDate != null ">#{worthDate},</if>
+            <if test="expectWorthDate != null ">#{expectWorthDate},</if>
+            <if test="millionCopiesIncome != null ">#{millionCopiesIncome},</if>
+            <if test="millionCopiesIncomeDate != null ">#{millionCopiesIncomeDate},</if>
+            <if test="sevenDaysYearIncome != null ">#{sevenDaysYearIncome},</if>
+            <if test="delFlag != null  and delFlag != ''">#{delFlag},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="updateBy != null  and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFundInfo" parameterType="FundInfo">
+        update fund_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null  and name != ''">name = #{name},</if>
+            <if test="type != null  and type != ''">type = #{type},</if>
+            <if test="buyMin != null ">buy_min = #{buyMin},</if>
+            <if test="buySourceRate != null ">buy_source_rate = #{buySourceRate},</if>
+            <if test="buyRate != null ">buy_rate = #{buyRate},</if>
+            <if test="manager != null  and manager != ''">manager = #{manager},</if>
+            <if test="fundScale != null  and fundScale != ''">fund_scale = #{fundScale},</if>
+            <if test="worthDate != null ">worth_date = #{worthDate},</if>
+            <if test="expectWorthDate != null ">expect_worth_date = #{expectWorthDate},</if>
+            <if test="millionCopiesIncome != null ">million_copies_income = #{millionCopiesIncome},</if>
+            <if test="millionCopiesIncomeDate != null ">million_copies_income_date = #{millionCopiesIncomeDate},</if>
+            <if test="sevenDaysYearIncome != null ">seven_days_year_income = #{sevenDaysYearIncome},</if>
+            <if test="delFlag != null  and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="createBy != null  and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="updateBy != null  and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+        </trim>
+        where code = #{code}
+    </update>
+
+    <delete id="deleteFundInfoById" parameterType="String">
+        delete from fund_info where code = #{code}
+    </delete>
+
+    <delete id="deleteFundInfoByIds" parameterType="String">
+        delete from fund_info where code in 
+        <foreach item="code" collection="array" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+    </delete>
+    
+</mapper>

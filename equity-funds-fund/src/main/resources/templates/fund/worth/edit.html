@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改记录基金每日净值数据')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-worth-edit" th:object="${fundDaysNetWorth}">
+            <input name="id" th:field="*{id}" type="hidden">
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script type="text/javascript">
+        var prefix = ctx + "fund/worth";
+        $("#form-worth-edit").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/edit", $('#form-worth-edit').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

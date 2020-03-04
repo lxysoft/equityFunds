@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.fund.mapper.FundIncomeMapper">
+    
+    <resultMap type="com.ruoyi.fund.domain.FundIncome" id="FundIncomeResult">
+        <result property="id"    column="id"    />
+        <result property="netWorkDate"    column="net_work_date"    />
+        <result property="fundInfoCode"    column="fund_info_code"    />
+        <result property="holdMony"    column="hold_mony"    />
+        <result property="holdTradeShare"    column="hold_trade_share"    />
+        <result property="incomeMony"    column="income_mony"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="buyPoundage"    column="buy_poundage"    />
+    </resultMap>
+
+    <sql id="selectFundIncomeVo">
+        select id, net_work_date, fund_info_code, hold_mony, hold_trade_share, income_mony, create_time, create_by, buy_poundage from fund_income
+    </sql>
+
+    <select id="selectFundIncomeList" parameterType="com.ruoyi.fund.domain.FundIncome" resultMap="FundIncomeResult">
+        <include refid="selectFundIncomeVo"/>
+        <where>  
+            <if test="fundInfoCode != null  and fundInfoCode != ''"> and fund_info_code = #{fundInfoCode}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+        </where>
+        order by net_work_date desc
+    </select>
+    
+    <select id="selectFundIncomeById" parameterType="String" resultMap="FundIncomeResult">
+        <include refid="selectFundIncomeVo"/>
+        where id = #{id}
+    </select>
+    <select id="selectLastDataByCreateAndCode" resultMap="FundIncomeResult">
+        <include refid="selectFundIncomeVo"/>
+        WHERE
+        create_by = #{createBy}
+        AND fund_info_code = #{fundInfoCode}
+        ORDER BY
+        net_work_date DESC
+        LIMIT 1
+    </select>
+
+    <insert id="insertFundIncome" parameterType="com.ruoyi.fund.domain.FundIncome">
+        insert into fund_income
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">id,</if>
+            <if test="netWorkDate != null ">net_work_date,</if>
+            <if test="fundInfoCode != null  and fundInfoCode != ''">fund_info_code,</if>
+            <if test="holdMony != null ">hold_mony,</if>
+            <if test="holdTradeShare != null ">hold_trade_share,</if>
+            <if test="incomeMony != null ">income_mony,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="buyPoundage != null  and buyPoundage != ''">buy_poundage,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">#{id},</if>
+            <if test="netWorkDate != null ">#{netWorkDate},</if>
+            <if test="fundInfoCode != null  and fundInfoCode != ''">#{fundInfoCode},</if>
+            <if test="holdMony != null ">#{holdMony},</if>
+            <if test="holdTradeShare != null ">#{holdTradeShare},</if>
+            <if test="incomeMony != null ">#{incomeMony},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="buyPoundage != null  and buyPoundage != ''">#{buyPoundage},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFundIncome" parameterType="com.ruoyi.fund.domain.FundIncome">
+        update fund_income
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="netWorkDate != null ">net_work_date = #{netWorkDate},</if>
+            <if test="fundInfoCode != null  and fundInfoCode != ''">fund_info_code = #{fundInfoCode},</if>
+            <if test="holdMony != null ">hold_mony = #{holdMony},</if>
+            <if test="holdTradeShare != null ">hold_trade_share = #{holdTradeShare},</if>
+            <if test="incomeMony != null ">income_mony = #{incomeMony},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="createBy != null  and createBy != ''">create_by = #{createBy},</if>
+            <if test="buyPoundage != null  and buyPoundage != ''">buy_poundage = #{buyPoundage},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFundIncomeById" parameterType="String">
+        delete from fund_income where id = #{id}
+    </delete>
+
+    <delete id="deleteFundIncomeByIds" parameterType="String">
+        delete from fund_income where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>
